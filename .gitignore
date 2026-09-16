@@ -1,0 +1,30 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache and tooling
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local configuration and environment files
+.env
+.env.*
+!.env.example
+
+# Generated downloads and logs
+downloads/
+*.log
+
+# OS and editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Downloaded media output folder
+downloads/
+*.mkv
+*.mp4
