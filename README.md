@@ -1,8 +1,5 @@
 # Movie Batch Downloader
 
-<<<<<<< HEAD
-A command-line downloader for movie and TV-series pages that expose downloadable links. It discovers episode or movie links, lets you choose what to download, automates the supported hoster, shows download progress, and keeps media organized for library scanners such as Plex or VLC.
-=======
 A two-engine downloader for movie and TV-series pages that expose downloadable links. The original Python Playwright CLI provides a terminal-first workflow with byte-level progress, while the companion Manifest V3 Chrome extension provides popup selection and background-tab automation.
 
 Both engines discover links from a source page, automate the supported hoster, skip completed files, retry transient failures, and organize media for library scanners such as Plex or VLC.
@@ -15,7 +12,6 @@ Both engines discover links from a source page, automate the supported hoster, s
 | Manifest V3 Chrome extension | Selecting episodes from the current browser page and continuing downloads in the background | `chrome-extension/` |
 
 The two engines share the same overall workflow but are separate implementations. The CLI streams the captured media URL itself; the extension hands the captured URL to Chrome's native download manager.
->>>>>>> 9ae1ddf (refactor: organize project into chrome-extension and python-cli subdirectories)
 
 ## Features
 
@@ -49,7 +45,7 @@ source venv/bin/activate
 Install the Python dependencies:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install -r python-cli/requirements.txt
 ```
 
 Install the Playwright Chromium browser:
@@ -69,14 +65,14 @@ python -m playwright install-deps chromium
 Use the virtual-environment Python executable:
 
 ```bash
-./venv/bin/python main.py
+./venv/bin/python python-cli/main.py
 ```
 
 Or activate the environment first and run:
 
 ```bash
 source venv/bin/activate
-python main.py
+python python-cli/main.py
 ```
 
 The program asks for a movie or series page URL:
@@ -152,8 +148,6 @@ The scraper recognizes some links containing `downloadwella`, `pixeldrain`, `meg
 
 The downloader does not improve video quality. It saves the file provided by the source hoster.
 
-<<<<<<< HEAD
-=======
 ## Chrome Extension
 
 The extension is a Manifest V3 companion for browser-based selection:
@@ -255,7 +249,6 @@ The extension supports retries, duplicate-file filtering, progress badges, deskt
 
 Chrome must have **Ask where to save each file before downloading** disabled for fully automatic batch routing. The extension intentionally uses Chrome's native download manager, so transfers remain visible in `chrome://downloads`.
 
->>>>>>> 9ae1ddf (refactor: organize project into chrome-extension and python-cli subdirectories)
 ## Troubleshooting
 
 ### Playwright browser is missing
@@ -281,15 +274,9 @@ The source page may have changed, require a login, or use a hoster that is not i
 ## Project Files
 
 ```text
-<<<<<<< HEAD
-main.py           Downloader application
-requirements.txt  Python dependencies
-downloads/        Downloaded media and organized folders
-README.md         Project documentation
-```
-=======
-main.py                  Python Playwright CLI engine
-requirements.txt         Python dependencies
+python-cli/              Python Playwright CLI engine
+    main.py              Downloader application
+    requirements.txt     Python dependencies
 downloads/               CLI downloaded media and organized folders
 chrome-extension/        Manifest V3 browser engine
     background.js          Queue, retries, hoster automation, native downloads
@@ -298,4 +285,3 @@ chrome-extension/        Manifest V3 browser engine
     options.html/js        Synced master-directory settings
 README.md                Project documentation
 ```
->>>>>>> 9ae1ddf (refactor: organize project into chrome-extension and python-cli subdirectories)
