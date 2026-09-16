@@ -15,16 +15,21 @@ __pycache__/
 .env.*
 !.env.example
 
-# Generated downloads and logs
+# Generated downloads, media, and logs
 downloads/
 *.log
+*.mkv
+*.mp4
 
 # OS and editor files
 .DS_Store
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Downloaded media output folder
-downloads/
-*.mkv
-*.mp4
+# Archives and temporary files
+*.zip
+*.tar
+*.tar.gz
+*.tmp

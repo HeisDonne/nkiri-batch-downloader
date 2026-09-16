@@ -1,6 +1,21 @@
 # Movie Batch Downloader
 
+<<<<<<< HEAD
 A command-line downloader for movie and TV-series pages that expose downloadable links. It discovers episode or movie links, lets you choose what to download, automates the supported hoster, shows download progress, and keeps media organized for library scanners such as Plex or VLC.
+=======
+A two-engine downloader for movie and TV-series pages that expose downloadable links. The original Python Playwright CLI provides a terminal-first workflow with byte-level progress, while the companion Manifest V3 Chrome extension provides popup selection and background-tab automation.
+
+Both engines discover links from a source page, automate the supported hoster, skip completed files, retry transient failures, and organize media for library scanners such as Plex or VLC.
+
+## Choose an Engine
+
+| Engine | Best for | Entry point |
+| --- | --- | --- |
+| Python Playwright CLI | Detailed terminal progress, explicit replacement prompts, and scripted runs | `main.py` |
+| Manifest V3 Chrome extension | Selecting episodes from the current browser page and continuing downloads in the background | `chrome-extension/` |
+
+The two engines share the same overall workflow but are separate implementations. The CLI streams the captured media URL itself; the extension hands the captured URL to Chrome's native download manager.
+>>>>>>> 9ae1ddf (refactor: organize project into chrome-extension and python-cli subdirectories)
 
 ## Features
 
@@ -137,6 +152,110 @@ The scraper recognizes some links containing `downloadwella`, `pixeldrain`, `meg
 
 The downloader does not improve video quality. It saves the file provided by the source hoster.
 
+<<<<<<< HEAD
+=======
+## Chrome Extension
+
+The extension is a Manifest V3 companion for browser-based selection:
+
+1. Open a series or movie listing page and open the extension popup.
+2. The popup scraper extracts supported host links and derives series, season, episode, or movie metadata.
+3. Select all items, Season 1, or individual checkboxes and press **Download**.
+4. The background service worker opens inactive tabs, clicks link-generator and hoster controls, waits through timers, and detects the media URL.
+5. Chrome downloads each file with `saveAs: false`, routing it into a relative series/season path under the configured Downloads directory.
+
+### Extension Architecture
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Popup as Popup UI (popup.js)
+    participant Content as Injected page scraper
+    participant Worker as Service worker (background.js)
+    participant HosterTab as Hidden hoster tab
+    participant Engine as Chrome download engine
+
+    User->>Popup: Open extension icon
+    Popup->>Content: Inject scrapePageLinks() into active tab
+    Content-->>Popup: Return links, series, season, and movie metadata
+    Popup->>User: Display filenames and selection controls
+    User->>Popup: Select episodes or movie and click Download
+    Popup->>Worker: START_BATCH_DOWNLOAD(queue)
+    Popup-->>User: Close popup
+
+    loop For each queued item
+        Worker->>Worker: Build relative filename
+        Note right of Worker: Master/Series S01/Series S01E01.mkv
+        Worker->>Worker: Check download history
+        alt File already exists
+            Worker->>Worker: Mark item skipped
+            Worker->>Worker: Update badge progress
+        else File is missing
+            loop Up to 3 attempts
+                Worker->>HosterTab: Open link in inactive tab
+                HosterTab->>HosterTab: Click Create Download Link if present
+                HosterTab->>HosterTab: Click Free Download if present
+                HosterTab->>HosterTab: Poll countdown and unlock #btn_download
+                HosterTab->>HosterTab: Click final download control
+                HosterTab-->>Worker: Return or expose media URL
+                Worker->>Engine: Start download with saveAs: false
+                Engine-->>Worker: Return downloadId and state events
+                alt Download starts
+                    Worker->>HosterTab: Close temporary tabs
+                else Automation or network failure
+                    Worker->>Worker: Retry after backoff
+                end
+            end
+            Worker->>Worker: Update badge progress
+        end
+    end
+
+    Worker->>User: Desktop error notification if retries fail
+    Worker->>User: Desktop completion notification
+    Worker->>Worker: Set badge to DONE
+```
+
+Example extension layout:
+
+```text
+Downloads/
+└── Reacher S04/
+    └── Reacher S04E06.mkv
+```
+
+The extension supports retries, duplicate-file filtering, progress badges, desktop error/completion notifications, movie links without episode codes, and quick popup presets. Open the extension's options page to set an optional relative master directory such as `Media/TV Series`; leave it empty to use the normal Downloads folder.
+
+### Extension Setup
+
+#### Installing Unpacked Extension
+
+1. Clone or download this repository to your computer:
+
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/nkiri-batch-downloader.git
+    cd nkiri-batch-downloader
+    ```
+
+    If you downloaded a ZIP archive, extract it and open the extracted project folder instead.
+
+2. Open your browser's extension management page:
+
+    - **Chrome:** `chrome://extensions/`
+    - **Brave:** `brave://extensions/`
+    - **Edge:** `edge://extensions/`
+
+3. Enable **Developer mode** using the toggle switch, usually in the top-right corner.
+
+4. Click **Load unpacked** and select the repository's `chrome-extension/` directory.
+
+5. Open the extension options page if you want to configure a custom relative master directory. Leave it empty to save directly under the browser's normal `Downloads/` folder.
+
+6. Reload the extension after changing its files.
+
+Chrome must have **Ask where to save each file before downloading** disabled for fully automatic batch routing. The extension intentionally uses Chrome's native download manager, so transfers remain visible in `chrome://downloads`.
+
+>>>>>>> 9ae1ddf (refactor: organize project into chrome-extension and python-cli subdirectories)
 ## Troubleshooting
 
 ### Playwright browser is missing
@@ -162,8 +281,21 @@ The source page may have changed, require a login, or use a hoster that is not i
 ## Project Files
 
 ```text
+<<<<<<< HEAD
 main.py           Downloader application
 requirements.txt  Python dependencies
 downloads/        Downloaded media and organized folders
 README.md         Project documentation
 ```
+=======
+main.py                  Python Playwright CLI engine
+requirements.txt         Python dependencies
+downloads/               CLI downloaded media and organized folders
+chrome-extension/        Manifest V3 browser engine
+    background.js          Queue, retries, hoster automation, native downloads
+    popup.js               Source-page scraper and episode selection
+    popup.html             Extension popup UI
+    options.html/js        Synced master-directory settings
+README.md                Project documentation
+```
+>>>>>>> 9ae1ddf (refactor: organize project into chrome-extension and python-cli subdirectories)
