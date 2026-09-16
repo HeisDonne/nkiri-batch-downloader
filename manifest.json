@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Series Batch Downloader",
+  "version": "1.1",
+  "description": "Scrapes episode links and automatically bypasses hoster timers in background tabs to download video files natively.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "tabs",
+    "notifications",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}
