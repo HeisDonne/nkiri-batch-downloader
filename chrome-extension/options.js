@@ -4,7 +4,9 @@ const downloadsButton = document.getElementById("use-downloads");
 const statusText = document.getElementById("status");
 
 chrome.storage.sync.get({ masterDirectory: "" }, (settings) => {
-  directoryInput.value = settings.masterDirectory;
+  directoryInput.value = /^untitled$/i.test(settings.masterDirectory.trim())
+    ? ""
+    : settings.masterDirectory;
 });
 
 saveButton.addEventListener("click", () => {
@@ -24,8 +26,9 @@ function saveDirectory(value) {
     .filter(Boolean)
     .join("/");
 
-  chrome.storage.sync.set({ masterDirectory }, () => {
-    statusText.textContent = masterDirectory ? "Settings saved." : "Using Downloads folder.";
+  const normalizedDirectory = /^untitled$/i.test(masterDirectory) ? "" : masterDirectory;
+  chrome.storage.sync.set({ masterDirectory: normalizedDirectory }, () => {
+    statusText.textContent = normalizedDirectory ? "Settings saved." : "Using Downloads folder.";
     setTimeout(() => {
       statusText.textContent = "";
     }, 2000);

@@ -5,6 +5,7 @@ const pendingTabs = new Map();
 const terminalDownloadStates = new Map();
 let masterDirectory = "";
 const MAX_EPISODE_RETRIES = 3;
+const DEFAULT_SERIES_FOLDER = "Series Downloads";
 
 // Load the optional folder setting before the queue starts so every item in a
 // batch uses the same relative download root.
@@ -28,7 +29,7 @@ async function processDownloadQueue(items) {
   for (const item of items) {
     try {
       const filename = getFilename(item);
-      if (await checkIfFileExists(filename)) {
+      if (await checkIfFileExists(filename, item)) {
         console.log(`[Skipped] Already downloaded: ${filename}`);
         handleDownloadFinished();
         continue;
@@ -62,18 +63,29 @@ async function retryEpisode(item) {
 }
 
 function getFilename(item) {
-  const series = sanitizePart(item.seriesFolder || item.seriesName || "Series_Downloads");
+  const series = getSeriesFolder(item);
   const episode = sanitizePart(item.fileTitle || item.title);
   return `${masterDirectory ? `${masterDirectory}/` : ""}${series}/${episode}.mkv`;
 }
 
+function getSeriesFolder(item) {
+  const value = item.seriesFolder || item.seriesName;
+  if (value && !isPlaceholderSeries(value)) return sanitizePart(value);
+  return DEFAULT_SERIES_FOLDER;
+}
+
+function isPlaceholderSeries(value) {
+  return /^(?:untitled|series(?:_downloads)?|downloads?)(?:\s+s\d+)?$/i.test(String(value).trim());
+}
+
 function normalizeDirectory(value) {
-  return String(value || "")
+  const normalized = String(value || "")
     .replace(/\\/g, "/")
     .split("/")
     .map(sanitizePart)
     .filter(Boolean)
     .join("/");
+  return /^untitled$/i.test(normalized) ? "" : normalized;
 }
 
 function notifyBatchFinished(count) {
@@ -102,19 +114,29 @@ function sanitizePart(value) {
     .replace(/[. ]+$/g, "") || "Untitled";
 }
 
-function checkIfFileExists(filename) {
+function checkIfFileExists(filename, item) {
   return new Promise((resolve) => {
-    chrome.downloads.search({}, (results) => {
+    chrome.downloads.search({ limit: 1000 }, (results) => {
       if (chrome.runtime.lastError || !results) {
         resolve(false);
         return;
       }
 
-      const expectedPaths = [filename, getLegacyFilename(filename)]
+      const legacyFilename = getLegacyFilename(filename);
+      const previousSeries = sanitizePart(item.seriesFolder || item.seriesName || "Series_Downloads");
+      const previousEpisode = sanitizePart(item.fileTitle || item.title);
+      const previousFilename = `${previousSeries}/${previousEpisode}.mkv`;
+      const expectedPaths = [
+        filename,
+        legacyFilename,
+        previousFilename,
+        `Untitled/${legacyFilename}`,
+        `Series_Downloads/${legacyFilename}`,
+      ]
         .map((path) => normalizeDownloadPath(path));
       resolve(results.some((download) => {
-        const actualPath = String(download.filename || "").replace(/\\/g, "/").toLowerCase();
-        return download.exists && download.state === "complete" &&
+        const actualPath = normalizeDownloadPath(download.filename);
+        return download.exists !== false && download.state === "complete" &&
           expectedPaths.some((expectedPath) =>
             actualPath.endsWith(`/${expectedPath}`) || actualPath === expectedPath
           );
