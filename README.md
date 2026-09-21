@@ -227,7 +227,7 @@ The extension supports retries, duplicate-file filtering, progress badges, deskt
 1. Clone or download this repository to your computer:
 
     ```bash
-    git clone https://github.com/YOUR_USERNAME/nkiri-batch-downloader.git
+    git clone https://github.com/HeisDonne/nkiri-batch-downloader.git
     cd nkiri-batch-downloader
     ```
 
